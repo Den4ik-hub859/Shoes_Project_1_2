@@ -19,10 +19,12 @@ namespace Shoes_Project_1_2
             if (totalPairs > 5)
             {
                 lblQuantity.Text = "Количество: много";
+                this.BackColor = Color.White;
             }
             else
             {
                 lblQuantity.Text = "Количество: мало";
+                this.BackColor = ColorTranslator.FromHtml("#70B2AF");
             }
 
             decimal finalPrice = basePrice;
@@ -39,15 +41,6 @@ namespace Shoes_Project_1_2
             else
             {
                 pic.Image = Properties.Resources.picture;
-            }
-
-            if (totalPairs <= 3)
-            {
-                this.BackColor = ColorTranslator.FromHtml("#FF8080");
-            }
-            else
-            {
-                this.BackColor = Color.White;
             }
         }
     }

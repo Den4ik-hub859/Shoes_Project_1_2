@@ -9,6 +9,9 @@ namespace Shoes_Project_1_2
         public ProductForm()
         {
             InitializeComponent();
+            this.Text = "Чудо Обувь — Товары";
+            this.BackColor = Color.White;
+            FLP.BackColor = Color.White;
             this.Load += FormLoad;
         }
 
@@ -27,18 +30,29 @@ namespace Shoes_Project_1_2
             {
                 using (var db = new MyDbContext())
                 {
-                    var oneMonthAgo = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
+                    var today = DateOnly.FromDateTime(DateTime.Now);
+                    var firstDayOfCurrentMonth = new DateOnly(today.Year, today.Month, 1);
+                    var startOfLastMonth = firstDayOfCurrentMonth.AddMonths(-1);
+                    var endOfLastMonth = firstDayOfCurrentMonth.AddDays(-1);
 
-                    var products = db.Products.Include(p => p.Category).Include(p => p.Manufacturer)
-                        .Include(p => p.ProductStocks).Include(p => p.OrderItems).ThenInclude(oi => oi.Order).ToList();
+                    var products = db.Products
+                        .Include(p => p.Category)
+                        .Include(p => p.Manufacturer)
+                        .Include(p => p.ProductStocks)
+                        .Include(p => p.OrderItems)
+                        .ThenInclude(oi => oi.Order)
+                        .ToList();
 
                     foreach (var p in products)
                     {
                         ProductControl card = new ProductControl();
 
-                        bool hasOrdersLastMonth = p.OrderItems.Any(oi => oi.Order != null && oi.Order.OrderDate >= oneMonthAgo);
+                        bool hasOrdersLastMonth = p.OrderItems.Any(oi =>
+                            oi.Order != null &&
+                            oi.Order.OrderDate >= startOfLastMonth &&
+                            oi.Order.OrderDate <= endOfLastMonth);
 
-                        int totalPairsCount = p.ProductStocks?.Count ?? 0;
+                        int totalPairsCount = p.ProductStocks?.Sum(s => s.QuantityAvailable) ?? 0;
 
                         card.InsertProduct(
                             brand: p.Manufacturer?.ManufacturerName ?? "Без бренда",
@@ -60,7 +74,6 @@ namespace Shoes_Project_1_2
                 MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-
 
         private Image LoadProductImage(string imageName)
         {
